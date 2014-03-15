@@ -55,7 +55,8 @@ if (@files) {
 
 # Create pcap object from an interface (disabled in this PoC version)
 sub sniff {
-       die 'Real time snifing was disabled in this initial version. \n Sorry for the trouble\n';
+	print 'Real time snifing was disabled in this initial version. \n Sorry for the trouble\n';
+	exit;
 }
 
 # Parse pcap files in batch. Creates pcap object from a saved file 
