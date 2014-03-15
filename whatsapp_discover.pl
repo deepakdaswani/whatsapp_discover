@@ -33,6 +33,14 @@ exit;
 
 usage() if (@ARGV < 1 or ! GetOptions('help|?' => \$help, 'i=s' => \$interface, 'f=s{,}' => \@files) or defined $help);
 
+
+
+if (!defined $interface && ! @files) { 
+	print "Please select an option\n";
+	usage();
+}
+
+
 if (defined $interface && @files) { 
 	print "Please select either an interface or a [single|list of] pcap file[s]\n";
 	usage();
@@ -40,7 +48,7 @@ if (defined $interface && @files) {
 
 # Print header
 print "\nWhatsapp Discover v1.0  --- Deepak Daswani (\@dipudaswani) 2014\n";
-print "                            http://deepakdaswani.es \n";
+print "                            http://deepakdaswani.es \n\n";
 
 # Sniff or parse pcap file[s]
 
@@ -61,43 +69,42 @@ sub sniff {
 
 # Parse pcap files in batch. Creates pcap object from a saved file 
 sub parse_file () {
-my $file = $_;
-$pcap = Net::Pcap::open_offline ("$file", \$err) or next; 
+
+	my $file = $_;
+	$pcap = Net::Pcap::open_offline ("$file", \$err) or next;
+
+	my $datalink;
+	$datalink = Net::Pcap::datalink($pcap);
+	# Fake a case block
+	CASE: {
+		# EN10MB capture files
+		($datalink == 1) && do {
+		$hoffset = 14;
+		last CASE;
+		};
+			
+		# Linux cooked socket capture files
+		($datalink == 113) && do {
+		$hoffset = 16;
+		last CASE;
+		};
+			
+		# DLT_IEEE802_11 capture files
+		($datalink == 105) && do {
+		$hoffset = 32;
+		last CASE;
+		}
+	}
+
+
+	my $filter = "tcp && (port 5222 or port 443 or port 5223)";  # Filters Whatsapp's traffic
+	my $filter_t;
+	Net::Pcap::compile( $pcap, \$filter_t, $filter, 1, 0 );
+	Net::Pcap::setfilter( $pcap, $filter_t );
+	Net::Pcap::loop( $pcap, 0, \&process_pkt, '' ); # Loop to process pcap file
+	Net::Pcap::close($pcap); # Close pcap object 
+
 }
-
-
-my $datalink;
-if ($hoffset == -1) { # Check datalink to know which type of frames are we parsing
-        $datalink = Net::Pcap::datalink($pcap);
-        # Fake a case block
-        CASE: {
-            # EN10MB capture files
-            ($datalink == 1) && do {
-                $hoffset = 14;
-                last CASE;
-            };
-
-            # Linux cooked socket capture files
-            ($datalink == 113) && do {
-                $hoffset = 16;
-                last CASE;
-            };
-
-            # DLT_IEEE802_11 capture files
-            ($datalink == 105) && do {
-                $hoffset = 32;
-                last CASE;
-            }
-        }
-    }
-
-my $filter = "tcp && (port 5222 or port 443 or port 5223)";  # Filters Whatsapp's traffic
-my $filter_t;
-Net::Pcap::compile( $pcap, \$filter_t, $filter, 1, 0 );
-Net::Pcap::setfilter( $pcap, $filter_t );
-Net::Pcap::loop( $pcap, 0, \&process_pkt, '' ); # Loop to process pcap file
-Net::Pcap::close($pcap); # Close pcap object 
-
 
 # Function for printing a packet. Only for debug purposes 
 sub print_pkt {
