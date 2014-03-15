@@ -55,7 +55,7 @@ if (@files) {
 
 # Create pcap object from an interface (disabled in this PoC version)
 sub sniff {
-	print 'Real time snifing was disabled in this initial version. \n Sorry for the trouble\n';
+	print "\nReal time snifing was disabled in this initial version. \nSorry for the trouble\n\n";
 	exit;
 }
 
