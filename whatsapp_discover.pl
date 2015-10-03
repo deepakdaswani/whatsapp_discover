@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
-# WHATSAPP DISCOVER 1.0 
+# WHATSAPP DISCOVER 1.1 
 # Author: Deepak Daswani (@dipudaswani)
 # Website: http://deepakdaswani.es
-# Date: March, 2014
+# Date: October, 2015
 
 use Getopt::Long;
 use Net::Pcap;
@@ -22,9 +22,9 @@ my $hoffset = -1;
 sub usage {
 
 print "Unknown option: @_\n\n" if ( @_ );
-print "\nWhatsapp Discover v1.0  --- Deepak Daswani (\@dipudaswani) 2014\n";
+print "\nWhatsapp Discover v1.1  --- Deepak Daswani (\@dipudaswani) 2015\n";
 print "                            http://deepakdaswani.es \n";
-print "Usage: whatsapp_discover -i interface | -f pcapfile[s]\n";
+print "Usage: whatsapp_discover.pl -i interface | -f pcapfile[s]\n";
 print "---------------------------------------------------------------\n\n\n";
 exit;
 }
@@ -47,7 +47,7 @@ if (defined $interface && @files) {
 }
 
 # Print header
-print "\nWhatsapp Discover v1.0  --- Deepak Daswani (\@dipudaswani) 2014\n";
+print "\nWhatsapp Discover v1.1  --- Deepak Daswani (\@dipudaswani) 2015\n";
 print "                            http://deepakdaswani.es \n\n";
 
 # Sniff or parse pcap file[s]
@@ -136,10 +136,10 @@ sub process_pkt {
 	my $ip_obj  = NetPacket::IP->decode( $paquete );
 	my $tcp_obj = NetPacket::TCP->decode( $ip_obj->{data} );
 	
-	if ($tcp_obj->{data} =~ /^WA.*?([a-zA-Z\-\.0-9]+).*?([0-9]{6,})/) {  # RegEx used to parse packet
+	if ($tcp_obj->{data} =~ /^WA.*?([a-zA-Z\-\.0-9]+)./) {  # RegEx used to parse packet
 		my $version = $1;
-		my $telefono = $2;
-		print "Got 1 number! S.O: $version Mobile number: +$telefono\n";
+		my ($telefono) = (unpack('H*', $tcp_obj->{data}) =~ /0cb5ff86(\d{6,16})f56bffc5/); #Get phone from raw packet
+ 		print "Got 1 number! S.O: $version Mobile number: +$telefono\n";
 		$count++;
 	}
 
