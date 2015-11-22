@@ -1,4 +1,3 @@
-
 #!/usr/bin/perl
 
 # WHATSAPP DISCOVER 1.1 
