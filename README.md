@@ -29,7 +29,7 @@ In the example below, the numbers have been darkened with X characters for priva
 
 	deepak@kali:~/code/whatsapp_discover$ ./whatsapp_discover.pl -f /home/deepak/pcapfiles/*.cap
 	
-	Whatsapp Discover v1.0  --- Deepak Daswani (@dipudaswani) 2014
+	Whatsapp Discover v1.1  --- Deepak Daswani (@dipudaswani) 2015
 	                            http://deepakdaswani.es 
 	
 	Parsing /home/deepak/pcapfiles/freewifi-01.cap ...

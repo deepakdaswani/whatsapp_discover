@@ -1,9 +1,10 @@
+
 #!/usr/bin/perl
 
-# WHATSAPP DISCOVER 1.0 
+# WHATSAPP DISCOVER 1.1 
 # Author: Deepak Daswani (@dipudaswani)
 # Website: http://deepakdaswani.es
-# Date: March, 2014
+# Date: November, 2015
 
 use Getopt::Long;
 use Net::Pcap;
@@ -22,7 +23,7 @@ my $hoffset = -1;
 sub usage {
 
 print "Unknown option: @_\n\n" if ( @_ );
-print "\nWhatsapp Discover v1.0  --- Deepak Daswani (\@dipudaswani) 2014\n";
+print "\nWhatsapp Discover v1.1  --- Deepak Daswani (\@dipudaswani) 2015\n";
 print "                            http://deepakdaswani.es \n";
 print "Usage: whatsapp_discover -i interface | -f pcapfile[s]\n";
 print "---------------------------------------------------------------\n\n\n";
@@ -141,6 +142,14 @@ sub process_pkt {
 		my $telefono = $2;
 		print "Got 1 number! S.O: $version Mobile number: +$telefono\n";
 		$count++;
+	} else  {  # For Android clients since ~ 2.11.476
+		if ($tcp_obj->{data} =~ /^WA.*?([a-zA-Z\-\.0-9]+).*?privacy/) {  # RegEx used to parse packet
+			my $version = $1;
+			my $tcppacket = unpack('H*',$tcp_obj->{data});
+			my $telefono = substr($tcppacket,136,11);     # Phone number is in hexadecimal 
+ 			print "Got 1 number! S.O: $version Mobile number: +$telefono\n";
+			$count++;
+		}
 	}
 
 }
